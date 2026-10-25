@@ -10,7 +10,7 @@ test('HTTP: handoff, login, authenticated game, and guarded internal service',as
   const json=await r.json();return {status:r.status,json,cookie:r.headers.get('set-cookie')};
  };
  try{
-  const health=await call('GET','/api/v1/health');assert.equal(health.status,200);assert.equal(health.json.version,'0.2.0-react');
+  const health=await call('GET','/api/v1/health');assert.equal(health.status,200);assert.equal(health.json.version,'0.5.0-admin-acr');
   const home=await fetch(base+'/');assert.ok([200,503].includes(home.status));
   if(home.status===503)assert.match(await home.text(),/React Web UI belum dibangun/);
   assert.equal((await call('POST','/internal/v1/handoffs',{subject:'tester@s.whatsapp.net'})).status,401);
@@ -21,6 +21,14 @@ test('HTTP: handoff, login, authenticated game, and guarded internal service',as
   const a=await call('POST',`/internal/v1/handoffs/${h.json.ref}/approve`,{subject:'tester@s.whatsapp.net',code:claim.json.challenge},{'X-WAE-Service-Key':key});assert.deepEqual(a.json,{ok:true});
   const f=await call('POST','/api/v1/handoffs/finalize',{ref:h.json.ref},{Cookie:cookie});assert.equal(f.status,200);
   const browserCookie=f.cookie.split(';')[0];
+  const catalog=await call('GET','/api/v1/games');
+  assert.ok(catalog.json.games.some(g=>g.code==='A1-02'));
+  const scatter=await call('POST','/api/v1/sessions',{game_code:'A1-02',bet:10},{Cookie:browserCookie});
+  assert.equal(scatter.status,201);
+  const scatterSpin=await call('POST',`/api/v1/sessions/${scatter.json.session.id}/actions`,{command_id:'http-scatter-spin-12345',expected_version:1,action:'SPIN',bet:10},{Cookie:browserCookie});
+  assert.equal(scatterSpin.status,200);
+  assert.equal(scatterSpin.json.session.last.grid.length,4);
+  assert.equal(scatterSpin.json.session.last.grid[0].length,6);
   const game=await call('POST','/api/v1/sessions',{game_code:'A1-01',bet:10},{Cookie:browserCookie});assert.equal(game.status,201);
   const sess=game.json.session;
   const action={command_id:'http-test-idempotent-1234',expected_version:sess.version,action:'SPIN',bet:10};

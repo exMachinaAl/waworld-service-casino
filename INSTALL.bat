@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 echo ================================================
-echo WORLD Arcade Engine v0.2 - React Installation
+echo WORLD Arcade Engine v0.5 - Admin ACR Installation
 echo ================================================
 where node >nul 2>nul
 if errorlevel 1 (

@@ -6,6 +6,7 @@ import {openDb,transaction,ensurePlayer,wallet,checkLedger} from './db.mjs';
 import {games,createGame,getSession,sessionsFor,act} from './games.mjs';
 import {createHandoff,claimHandoff,approveHandoff,finalizeHandoff,handoffStatus,pendingForWa,browserPlayer,revokeSession,devices,revokeDevice,makeWaLink,claimWaLink,confirmWaLink,waLinkStatus,approveWaLinkWeb} from './auth.mjs';
 import {token,uuid,parse,json,digest,now,assert,fail,equal,HttpError} from './util.mjs';
+import {setupAdminSchema,adminLogin,adminSession,adminLogout,adminPlayers,adminDashboard,adminRecentAdjustments,adminAdjust} from './admin.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 function getEnv(){const filename=path.join(root,'.env');if(!fs.existsSync(filename))return;for(const line of fs.readFileSync(filename,'utf8').split(/\r?\n/)){const m=line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);if(m&&!process.env[m[1]])process.env[m[1]]=m[2].trim();}}
 getEnv();
@@ -21,9 +22,13 @@ function verifyOrigin(req){
  assert(o&&o===(process.env.WAE_PUBLIC_ORIGIN||siteOrigin(req)),403,'ORIGIN_DENIED');
 }
 export function createApp({database=':memory:',serviceKey=process.env.WAE_SERVICE_TOKEN||'',demo=process.env.WAE_DEMO_MODE==='1',host='127.0.0.1'}={}){
- const db=openDb(database);const active=new Map(),rate=new Map();
+ const db=openDb(database);setupAdminSchema(db);const active=new Map(),rate=new Map();
+ const adminEnabled=Boolean(demo&&host==='127.0.0.1'&&process.env.WAE_ADMIN_TEST_GRANTS==='1');
  const secure=process.env.WAE_COOKIE_SECURE==='1';
  const sessCookie=secure?'__Host-wae_session':'wae_session',claimCookie=secure?'__Host-wae_claim':'wae_claim';
+ const adminCookie=secure?'__Host-wae_admin':'wae_admin';
+ function requireAdmin(req){assert(adminEnabled,403,'ADMIN_TEST_DISABLED');
+   const session=adminSession(db,getCookies(req)[adminCookie]);assert(session,401,'ADMIN_LOGIN_REQUIRED');return session;}
  function auth(req){const s=browserPlayer(db,getCookies(req)[sessCookie]);assert(s,401,'LOGIN_REQUIRED');return s;}
  function protectedService(req){assert(serviceKey&&serviceKey.length>=24,503,'SERVICE_NOT_CONFIGURED');const k=req.headers['x-wae-service-key'];assert(typeof k==='string'&&equal(k,serviceKey),401,'BAD_SERVICE_KEY');}
  function limit(req,key,max=20,window=60000){const ip=req.socket.remoteAddress||'?';const k=`${ip}:${key}`;const t=now(),entry=rate.get(k);if(!entry||t-entry.s>window)rate.set(k,{s:t,n:1});else{entry.n++;assert(entry.n<=max,429,'RATE_LIMITED');}if(rate.size>3000){for(const [k,v] of rate)if(t-v.s>60000)rate.delete(k);}}
@@ -36,7 +41,7 @@ export function createApp({database=':memory:',serviceKey=process.env.WAE_SERVIC
    // React/Vite builds into web-dist, served by the SAME origin as our cookie-protected API.
    // Never serve arbitrary files under project root; only Vite output with a safe static path.
    const dist=path.join(root,'web-dist');
-   if(req.method==='GET'&&['/','/connect','/app'].includes(pathname)){
+   if(req.method==='GET'&&['/','/connect','/app','/admin'].includes(pathname)){
      const file=path.join(dist,'index.html');
      if(!fs.existsSync(file)){
        res.writeHead(503,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});
@@ -54,8 +59,37 @@ export function createApp({database=':memory:',serviceKey=process.env.WAE_SERVIC
      fs.createReadStream(asset).pipe(res);return;
    }
 
-   if(req.method==='GET'&&pathname==='/api/v1/health')return jsonResponse(res,200,{ok:true,version:'0.2.0-react',mode:demo?'local-demo':'normal',service_ready:serviceKey.length>=24});
+   if(req.method==='GET'&&pathname==='/api/v1/health')return jsonResponse(res,200,{ok:true,version:'0.5.0-admin-acr',mode:demo?'local-demo':'normal',service_ready:serviceKey.length>=24,admin_test_available:adminEnabled});
    if(req.method==='GET'&&pathname==='/api/v1/games')return jsonResponse(res,200,{games:games()});
+   // Admin test controls are deliberately isolated from player cookies, bot service credentials and VCUR.
+   // Safe default: unavailable unless WAE_DEMO_MODE=1 + loopback host + WAE_ADMIN_TEST_GRANTS=1.
+   if(pathname.startsWith('/api/v1/admin/')){
+     // Reject reverse-proxy/public hosts even when local test mode was mistakenly enabled.
+     const localHost=url.hostname==='127.0.0.1'&&remoteAllowed(req.socket.remoteAddress);
+     const proxied=Boolean(req.headers['x-forwarded-for']||req.headers['forwarded']||req.headers['x-forwarded-host']);
+     assert(adminEnabled&&localHost&&!proxied,403,'ADMIN_TEST_DISABLED');
+     if(req.method==='POST'){verifyOrigin(req);limit(req,'admin-post',30);}
+     if(req.method==='POST'&&pathname==='/api/v1/admin/login'){
+       limit(req,'admin-login',5,15*60*1000);
+       const b=await body(req);
+       const result=adminLogin(db,b.username,b.password);
+       res.setHeader('Set-Cookie',cookie(adminCookie,result.secret,secure));
+       return jsonResponse(res,200,{username:result.username,role:result.role,expires_at:result.expires_at});
+     }
+     const admin=requireAdmin(req);
+     if(req.method==='GET'&&pathname==='/api/v1/admin/me')return jsonResponse(res,200,{username:admin.username,role:admin.role,expires_at:admin.expires_ms});
+     if(req.method==='POST'&&pathname==='/api/v1/admin/logout'){
+       adminLogout(db,admin);res.setHeader('Set-Cookie',cookie(adminCookie,'',secure,0));return jsonResponse(res,200,{ok:true});
+     }
+     if(req.method==='GET'&&pathname==='/api/v1/admin/overview')return jsonResponse(res,200,adminDashboard(db));
+     if(req.method==='GET'&&pathname==='/api/v1/admin/players')return jsonResponse(res,200,{players:adminPlayers(db,url.searchParams.get('q')||'')});
+     if(req.method==='GET'&&pathname==='/api/v1/admin/adjustments')return jsonResponse(res,200,{adjustments:adminRecentAdjustments(db)});
+     if(req.method==='POST'&&pathname==='/api/v1/admin/wallet/adjust'){
+       limit(req,'admin-adjust',15,60*1000);
+       const result=adminAdjust(db,admin,await body(req));return jsonResponse(res,200,result);
+     }
+     fail(404,'ENDPOINT_NOT_FOUND');
+   }
    if(pathname.startsWith('/internal/')){
     protectedService(req);limit(req,'internal',240);
     const b=req.method==='POST'?await body(req):{};
@@ -129,7 +163,7 @@ export function createApp({database=':memory:',serviceKey=process.env.WAE_SERVIC
       const s=auth(req);return jsonResponse(res,200,{devices:devices(db,s.player_id),current_id:s.id});
    }
    if(req.method==='POST'&&pathname==='/api/v1/logout'){
-      const s=auth(req);revokeSession(db,s);res.setHeader('Set-Cookie',cookie(sessCookie,'',secure,0));return jsonResponse(res,200,{ok:true});
+      const s=auth(req);revokeSession(db,s);const as=adminSession(db,getCookies(req)[adminCookie]);if(as)adminLogout(db,as);res.setHeader('Set-Cookie',[cookie(sessCookie,'',secure,0),cookie(adminCookie,'',secure,0)]);return jsonResponse(res,200,{ok:true});
    }
    const deviceMatch=pathname.match(/^\/api\/v1\/devices\/([a-f0-9]{32})\/revoke$/);
    if(req.method==='POST'&&deviceMatch){const s=auth(req);revokeDevice(db,s.player_id,deviceMatch[1]);return jsonResponse(res,200,{ok:true});}
@@ -158,5 +192,5 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
     console.error('Refusing public bind without secure cookies. Use TLS reverse proxy and WAE_COOKIE_SECURE=1.');process.exit(1);
  }
  const app=createApp(config);
- app.server.listen(port,host,()=>console.log(`WAE 0.2.0 React listening on http://${host}:${port} (demo=${config.demo}); VCUR bridge: DISABLED`));
+ app.server.listen(port,host,()=>console.log(`WAE 0.5.0 Admin ACR listening on http://${host}:${port} (demo=${config.demo}); VCUR bridge: DISABLED`));
 }

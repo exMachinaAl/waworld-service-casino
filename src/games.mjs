@@ -1,8 +1,10 @@
 import {randomInt} from 'node:crypto';
 import {uuid,now,json,parse,assert,fail} from './util.mjs';
 import {transaction,wallet,transfer,accountId} from './db.mjs';
+import {generateGrid,resolveScatterSpin} from './scatter-rush.mjs';
 const GAMES={
  'A1-01':{name:'Classic Match 3x3',description:'3 horizontal paylines, three identical symbols from left'},
+ 'A1-02':{name:'Scatter Rush 6x4',description:'6 reels, 4 rows, scatters on 3+ distinct columns, +5 free-spin retrigger (maximum 50 total)'},
  'B1':{name:'European Roulette',description:'European 0-36, red/black/odd/even/number'},
  'B2':{name:'Blackjack Solo',description:'Dealer vs player, hit/stand'}
 };
@@ -70,6 +72,14 @@ function perform(db,pid,record,command){
   for(let i=0;i<3;i++){const row=grid[i],sym=row[0];if(row.every(v=>v===sym)){const reward=bet*PAY[sym];matches.push({row:i+1,symbol:SYMBOLS[sym],payout:reward});payout+=reward;}}
   credit(db,pid,payout,`action:${command.command_id}:payout`);
   Object.assign(state,{phase:'READY',bet,last:{grid:grid.map(r=>r.map(i=>SYMBOLS[i])),matches,payout,net:payout-bet}});
+ }else if(record.game_code==='A1-02'){
+  assert(action==='SPIN',400,'INVALID_ACTION');checkBet(bet);
+  const free=state.phase==='BONUS'&&state.bonus?.remaining>0;
+  if(free)assert(bet===state.bet,409,'BET_LOCKED_DURING_BONUS');
+  if(!free)debit(db,pid,bet,`action:${command.command_id}:stake`);
+  const next=resolveScatterSpin(state,generateGrid(),bet);
+  credit(db,pid,next.last.payout,`action:${command.command_id}:payout`);
+  Object.assign(state,next);
  }else if(record.game_code==='B1'){
   assert(action==='SPIN',400,'INVALID_ACTION');checkBet(bet);
   const choice=String(command.choice??'').toLowerCase();

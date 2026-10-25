@@ -1,0 +1,127 @@
+/* WORLD Arcade Engine v0.3 — motion layer (no game logic and no RNG). */
+.cinematic-stage{position:relative;isolation:isolate;overflow:hidden;min-height:440px}
+.cinematic-stage>*:not(.stage-ambient):not(.win-confetti){position:relative;z-index:2}
+.cinematic-stage .stage-ambient{position:absolute;z-index:0;inset:0;pointer-events:none;overflow:hidden}
+.stage-ambient i{position:absolute;display:block;width:200px;height:200px;border-radius:50%;filter:blur(60px);opacity:.18;animation:ambientFloat 7s ease-in-out infinite alternate}
+.stage-ambient i:nth-child(1){background:#a664ff;left:-10%;top:10%}
+.stage-ambient i:nth-child(2){background:#32ceae;right:-20%;bottom:-15%;animation-delay:-3s}
+.stage-ambient i:nth-child(3){background:#ebac43;left:40%;top:-30%;animation-delay:-5s}
+.stage-kicker{margin:18px auto 0;display:flex;align-items:center;justify-content:center;gap:7px;color:#c9a7ec;font-weight:850;font-size:10px;letter-spacing:1.8px}
+.slot-stage.cinematic-stage{background:radial-gradient(ellipse 60% 45% at 50% 38%,#663a7945,transparent 100%),linear-gradient(145deg,#251d33,#151620 78%)}
+.slot-cabinet{width:min(490px,100%);margin:22px auto 16px;padding:10px 12px 9px;border:1px solid #a87fca99;border-radius:21px;background:linear-gradient(130deg,#624075,#261f39 18%,#231e30 80%,#60467d);box-shadow:inset 0 1px #ffffff30,inset 0 -3px #0b0b16,0 22px 60px #05051099,0 0 32px #874cc01c}
+.slot-top-line{height:29px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#dbbaff;font-size:10px;letter-spacing:3px;font-weight:900;text-shadow:0 0 14px #ab6fec88}
+.slot-top-line span:first-child,.slot-top-line span:last-child{color:#e8b975;font-size:18px}
+.slot-stage .animated-reels{margin:0 auto;max-width:none;border:5px solid #110d1a;box-shadow:inset 0 0 24px #000a,0 0 0 1px #a77abe55;border-radius:13px;padding:8px;gap:7px;overflow:hidden;position:relative;background:linear-gradient(180deg,#121421,#1d192d)}
+.reel-cell{position:relative;overflow:hidden;z-index:1;min-height:77px;border:1px solid #68567888;background:linear-gradient(165deg,#51405e,#292238 65%,#231d2d);box-shadow:inset 0 8px 13px #fff1,inset 0 -8px 15px #0004;transform:translateZ(0)}
+.reel-symbol{position:relative;z-index:1;display:grid;place-items:center;min-height:75px;width:100%;font-size:42px;filter:drop-shadow(0 4px 4px #0008)}
+.reel-motion-blur{position:absolute;inset:-130% 0;display:grid;place-items:center;line-height:1.9;text-align:center;color:#f9e8ff;font-size:33px;opacity:0;pointer-events:none}
+.is-spinning .reel-motion-blur{opacity:.95;animation:reelTravel .2s linear infinite}
+.is-spinning .reel-column-1 .reel-motion-blur{animation-duration:.24s}
+.is-spinning .reel-column-2 .reel-motion-blur{animation-duration:.18s}
+.is-spinning .reel-symbol{opacity:.20;filter:blur(9px)}
+.is-spinning .reel-cell{box-shadow:inset 0 0 18px #ae5be855;animation:reelFlicker .5s ease-in-out infinite alternate}
+.is-spinning .reel-column-1{animation-delay:-.18s}
+.is-spinning .reel-column-2{animation-delay:-.33s}
+.slot-payline{position:absolute;pointer-events:none;z-index:3;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,#e7bf6baa,transparent);box-shadow:0 0 10px #b873ff66}
+.cabinet-leds{display:flex;align-items:center;justify-content:space-around;padding:9px 3px 3px}
+.cabinet-leds i{width:6px;height:6px;border-radius:50%;background:#ad6ed2;box-shadow:0 0 9px #bd82ff;opacity:.4}
+.is-spinning .cabinet-leds i{animation:ledBlink .7s ease-in-out infinite alternate}
+.is-spinning .cabinet-leds i:nth-child(3n+1){animation-delay:-.2s}
+.is-spinning .cabinet-leds i:nth-child(3n+2){animation-delay:-.45s}
+.is-revealing .reel-cell{animation:reelArrive .48s cubic-bezier(.2,1.3,.3,1) both}
+.is-revealing .reel-column-1{animation-delay:.08s}
+.is-revealing .reel-column-2{animation-delay:.16s}
+.has-won .slot-cabinet{animation:goldenPulse 1s ease-out both}
+.stage-result .win-text{color:#f5d58b;text-shadow:0 0 28px #ffca55aa}
+.motion-status{min-height:30px;display:flex;align-items:center;justify-content:center;gap:7px;color:#8e89a2;font-size:10px;letter-spacing:.2px;margin-top:9px}
+.is-spinning .motion-status{color:#e0c1fd}
+.win-confetti{position:absolute;z-index:5;inset:20% 6% 2%;pointer-events:none;overflow:hidden}
+.win-confetti i{position:absolute;width:6px;height:12px;background:#edbb68;opacity:0;left:calc(5% + var(--i,0)*8%);top:0;animation:confettiDrop .95s ease-in forwards}
+.win-confetti i:nth-child(1){left:5%;animation-delay:.00s}.win-confetti i:nth-child(2){left:13%;background:#a57df9;animation-delay:.08s}.win-confetti i:nth-child(3){left:23%;animation-delay:.15s}.win-confetti i:nth-child(4){left:33%;background:#70d8d1;animation-delay:.04s}.win-confetti i:nth-child(5){left:41%;animation-delay:.12s}.win-confetti i:nth-child(6){left:49%;background:#a57df9;animation-delay:.20s}.win-confetti i:nth-child(7){left:57%;animation-delay:.06s}.win-confetti i:nth-child(8){left:65%;background:#70d8d1;animation-delay:.17s}.win-confetti i:nth-child(9){left:73%;animation-delay:.03s}.win-confetti i:nth-child(10){left:81%;background:#a57df9;animation-delay:.12s}.win-confetti i:nth-child(11){left:89%;animation-delay:.19s}.win-confetti i:nth-child(12){left:95%;background:#70d8d1;animation-delay:.07s}
+
+/* Roulette: the wheel is only a visualization. The number always comes from the API. */
+.roulette-stage.cinematic-stage{background:radial-gradient(ellipse 70% 50% at 50% 40%,#8c5a3850,transparent 100%),linear-gradient(130deg,#29232a,#151a20)}
+.roulette-top-label{width:100%;margin-bottom:15px}
+.roulette-spotlight{filter:drop-shadow(0 22px 26px #0009)}
+.roulette-stage .animated-wheel{width:252px;height:252px;display:grid;place-items:center;border:12px solid #b78753;background:#252326;box-shadow:0 0 0 3px #62402a,0 0 0 7px #2b2526,inset 0 0 0 5px #d0a67b;overflow:visible}
+.roulette-stage .animated-wheel:after{z-index:6;left:calc(50% - 8px);top:-37px;color:#ffe0b2;text-shadow:0 3px 8px #000}
+.roulette-rotor{transform:rotate(var(--wheel-final-angle,0deg));position:absolute;inset:8px;border:1px solid #ddb687;border-radius:50%;background:conic-gradient(from -4.865deg,#24805a 0deg 9.73deg,transparent 9.73deg),repeating-conic-gradient(#aa4646 0 9.73deg,#1d2428 9.73deg 19.46deg);box-shadow:0 0 0 4px #8e673d,inset 0 0 0 5px #191a20}
+.roulette-pocket{position:absolute;top:0;left:50%;height:50%;width:14px;margin-left:-7px;padding-top:6px;display:flex;align-items:center;flex-direction:column;font:700 7px/1 'Segoe UI',sans-serif;color:#f9f3e7;transform-origin:bottom center;transform:rotate(calc(var(--pocket)*9.7297297deg));pointer-events:none}
+.roulette-pocket.pocket-red{color:#ffd0cf}.roulette-pocket.pocket-green{color:#a6f0bd}
+.roulette-ball-track{position:absolute;inset:-3px;border:2px solid #e1ae73;border-radius:50%;z-index:4;pointer-events:none}
+.roulette-ball{position:absolute;top:3px;left:calc(50% - 6px);height:12px;width:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#e9dec2 65%,#817766);box-shadow:0 1px 5px #000;z-index:5}
+.roulette-stage .roulette-inner{position:relative;z-index:5;width:120px;height:120px;border:9px solid #b18a57;background:radial-gradient(circle,#845634,#3d302c);box-shadow:inset 0 0 15px #1b1410,0 6px 20px #000a}
+.is-spinning .roulette-rotor{animation:rouletteForward 2.4s cubic-bezier(.15,.4,.16,1) both}
+.is-spinning .roulette-ball-track{animation:rouletteReverse 2.4s cubic-bezier(.2,.35,.12,1) both}
+.is-spinning .roulette-inner span{animation:numberPulse .55s ease-in-out infinite alternate}
+.is-revealing .roulette-inner{animation:resultGlow .8s ease-out}
+.roulette-result-tag{display:inline-flex;background:#ffffff12;border:1px solid #ffffff22;color:#c0becb;font-size:9px;letter-spacing:1.6px;padding:6px 11px;border-radius:99px;font-weight:800}
+.roulette-result-tag.won{color:#a6ebbb;border-color:#4a9360;background:#22604236}
+
+/* Blackjack: cards animate into their authoritative positions, with no client-side dealing/RNG. */
+.blackjack-stage.cinematic-stage{background:radial-gradient(ellipse 72% 60% at 50% 50%,#12684a55,transparent 100%),linear-gradient(145deg,#152e2c,#101b25)}
+.blackjack-stage:before{content:'';position:absolute;inset:15px 24px;border:2px solid #b29c694d;border-radius:46% / 39%;pointer-events:none;z-index:0;box-shadow:inset 0 0 0 11px #ffffff05}
+.blackjack-stage .table-mark{z-index:1;text-shadow:0 0 15px #92c6b744}
+.blackjack-stage .table-mark span{color:#e8c583}
+.blackjack-stage .hand{z-index:2;position:relative}
+.blackjack-stage .hand-cards{perspective:800px;justify-content:center;flex-wrap:wrap;max-width:400px}
+.blackjack-stage .playing-card{position:relative;backface-visibility:hidden;transform-origin:center bottom}
+.card-deal{animation:cardDeal .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--card-i) * 110ms)}
+.is-dealing .hand-cards{animation:tableBreath .6s ease-in-out infinite alternate}
+.blackjack-round-label{z-index:3;display:flex;align-items:center;gap:7px;justify-content:center;min-height:29px;color:#b4e5c8;font-size:10px;font-weight:750;letter-spacing:1px}
+.blackjack-stage .table-divider{z-index:2}
+.table-integrity{position:relative;z-index:2;display:flex;align-items:center;gap:7px;font-size:9px;color:#75a991;letter-spacing:.8px;margin-top:2px}
+.is-revealing .bj-result{animation:resultGlow .85s ease-out}
+
+/* Small motion cues elsewhere; no flashy auto-playing game mechanics */
+.catalog-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.catalog-card:hover:not(:disabled){transform:translateY(-4px);box-shadow:0 18px 45px #0203056b}
+.hero-coin{animation:heroHover 5s ease-in-out infinite alternate}
+.hero-spark{animation:twinkle 3s ease-in-out infinite alternate}
+.hero-spark.two{animation-delay:-1.4s}
+.motion-pref{display:flex;align-items:center;gap:9px;width:100%;margin-top:18px;padding:12px;border-radius:10px;color:#b3aec4;background:#ffffff05;border:1px solid #ffffff1b;font-size:11px;text-align:left}
+.motion-pref span{margin-left:auto;font-size:10px;color:#9d8db0}
+.motion-pref:hover{border-color:#a782d088;background:#aa7dd011}
+.motion-pref:focus-visible{outline:2px solid #ab8fef;outline-offset:2px}
+.motion-pref[aria-pressed="true"]{color:#dbc2fc}
+
+@keyframes ambientFloat{from{transform:translate(-10px,10px) scale(.8)}to{transform:translate(30px,-30px) scale(1.15)}}
+@keyframes reelTravel{from{transform:translateY(-23%)}to{transform:translateY(28%)}}
+@keyframes reelFlicker{from{filter:brightness(1)}to{filter:brightness(1.3)}}
+@keyframes ledBlink{from{opacity:.2}to{opacity:1;background:#efcfff}}
+@keyframes reelArrive{from{opacity:.6;transform:translateY(-22px) scale(.9);filter:blur(7px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes goldenPulse{0%{filter:brightness(1)}35%{filter:brightness(1.32);box-shadow:0 0 40px #edb95791}100%{filter:brightness(1)}}
+@keyframes confettiDrop{0%{opacity:0;transform:translateY(-12px) rotate(0)}10%{opacity:1}100%{opacity:0;transform:translateY(220px) rotate(680deg)}}
+@keyframes rouletteForward{from{transform:rotate(calc(var(--wheel-final-angle,0deg) - 1080deg))}to{transform:rotate(var(--wheel-final-angle,0deg))}}
+@keyframes rouletteReverse{from{transform:rotate(0)}to{transform:rotate(-1380deg)}}
+@keyframes numberPulse{from{opacity:.4;transform:scale(.9)}to{opacity:1;transform:scale(1.12)}}
+@keyframes resultGlow{0%{filter:brightness(1.8);transform:scale(.96)}100%{filter:brightness(1);transform:scale(1)}}
+@keyframes cardDeal{from{opacity:0;transform:translate(80px,-80px) rotate(-15deg) rotateY(88deg)}65%{opacity:1}to{transform:translate(0,0) rotate(0) rotateY(0);opacity:1}}
+@keyframes tableBreath{from{filter:brightness(1)}to{filter:brightness(1.2)}}
+@keyframes heroHover{from{transform:translateY(0) rotate(-6deg)}to{transform:translateY(-12px) rotate(8deg)}}
+@keyframes twinkle{from{opacity:.3;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}
+@media(max-width:520px){.cinematic-stage{min-height:400px}.slot-cabinet{padding:6px 7px}.slot-stage .animated-reels{padding:5px;gap:4px;border-width:3px}.reel-cell{min-height:62px}.reel-symbol{min-height:60px;font-size:33px}.reel-motion-blur{font-size:26px}.roulette-stage .animated-wheel{width:213px;height:213px}.roulette-stage .roulette-inner{height:100px;width:100px}.roulette-pocket{font-size:6px;padding-top:4px}.blackjack-stage:before{inset:18px 9px}}
+@media(prefers-reduced-motion:reduce){:root:not([data-wae-motion="on"]) .cinematic-stage *, :root:not([data-wae-motion="on"]) .hero-coin,:root:not([data-wae-motion="on"]) .hero-spark{animation:none!important;transition:none!important}}
+.reduce-motion *, .reduce-motion:before,.reduce-motion:after{animation:none!important;transition:none!important}
+.view-intro,.hero-copy,.catalog-card,.wallet-feature,.security-grid>.panel{animation:contentAppear .45s ease-out both}
+.catalog-card:nth-child(2){animation-delay:.06s}.catalog-card:nth-child(3){animation-delay:.12s}
+@keyframes contentAppear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){:root:not([data-wae-motion="on"]) .view-intro,:root:not([data-wae-motion="on"]) .hero-copy,:root:not([data-wae-motion="on"]) .catalog-card,:root:not([data-wae-motion="on"]) .wallet-feature,:root:not([data-wae-motion="on"]) .security-grid>.panel{animation:none}}
+
+/* A1-02: six-column Scatter Rush; presentational only, all prizes arrive from server. */
+.scatter-stage{position:relative;overflow:hidden;min-height:410px;border-radius:16px;padding:22px 19px;display:flex;flex-direction:column;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 8%,#8951bc67,transparent 61%),linear-gradient(145deg,#251836,#111420);border:1px solid #654681}
+.scatter-title{display:flex;justify-content:center;align-items:center;gap:12px;color:#ffdb91;letter-spacing:3px;font:900 clamp(16px,3vw,23px) 'Outfit',sans-serif;text-shadow:0 0 22px #bc80e79b}
+.scatter-title svg{color:#ebc2ff;filter:drop-shadow(0 0 7px #df9cff)}
+.scatter-bonus{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}.scatter-bonus span{padding:5px 8px;font-size:9px;color:#e8d6ff;border:1px solid #71568d;border-radius:100px;background:#664b7a4d}
+.scatter-board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:9px;border:3px solid #8959a9;border-radius:13px;background:linear-gradient(140deg,#110d1a,#2e193f);box-shadow:0 10px 29px #050308a6,inset 0 0 19px #0005;max-width:650px;width:100%;margin:auto}
+.scatter-cell{min-width:0;aspect-ratio:1/1;display:grid;place-items:center;overflow:hidden;border-radius:7px;border:1px solid #715182;background:linear-gradient(155deg,#443358,#241a34);font-size:clamp(16px,3vw,33px);text-shadow:0 4px 12px #09060da9}
+.scatter-hit{border-color:#eab75e;background:linear-gradient(155deg,#71503d,#4b2e35);box-shadow:inset 0 0 12px #fae7a936,0 0 12px #ffcb6750}
+.scatter-motion{display:inline-block;line-height:1.3;transform:translateY(-22%);filter:blur(2px)}.scatter-stage.is-spinning .scatter-motion{animation:scatterRoll .26s linear infinite alternate}
+.scatter-stage.is-spinning .scatter-cell:nth-child(6n + 2) .scatter-motion{animation-delay:-.08s}.scatter-stage.is-spinning .scatter-cell:nth-child(6n + 3) .scatter-motion{animation-delay:-.17s}.scatter-stage.is-spinning .scatter-cell:nth-child(6n + 4) .scatter-motion{animation-delay:-.11s}.scatter-stage.is-spinning .scatter-cell:nth-child(6n + 5) .scatter-motion{animation-delay:-.21s}
+.scatter-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:650px;width:100%;margin:auto}.scatter-progress>div{background:#0c0c18a8;border:1px solid #553d6b;border-radius:9px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px}.scatter-progress span{font-size:9px;color:#bcb0cc}.scatter-progress strong{font-size:14px;color:#f3d39a}
+.scatter-meter{max-width:650px;width:100%;height:5px;background:#433057;border-radius:999px;margin:-7px auto 2px;overflow:hidden}.scatter-meter i{display:block;height:100%;background:linear-gradient(90deg,#b674f1,#ebc567);transition:width .3s}
+.scatter-retrigger-flash{pointer-events:none;position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-weight:900;color:#ffe4ab;white-space:nowrap;text-shadow:0 0 24px #f7d275,0 4px 16px #000;animation:scatterBonus .8s ease-out both;font-size:clamp(16px,4vw,29px)}
+@keyframes scatterRoll{0%{transform:translateY(-30%)}100%{transform:translateY(14%)}}@keyframes scatterBonus{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-75%) scale(1)}}
+@media(max-width:520px){.scatter-stage{padding:16px 9px;min-height:370px}.scatter-board{gap:3px;padding:5px}.scatter-cell{font-size:clamp(16px,5vw,22px)}.scatter-progress>div{padding:8px 5px;flex-direction:column;text-align:center}.scatter-progress span{font-size:8px}.scatter-bonus span{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.scatter-stage:not(.reduce-motion) .scatter-motion{animation:none}}
+.scatter-stage.reduce-motion .scatter-motion,.scatter-stage.reduce-motion .scatter-retrigger-flash{animation:none!important}
