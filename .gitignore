@@ -1,0 +1,9 @@
+.env
+/data/*
+!/data/.gitkeep
+node_modules/
+*.sqlite*
+*.log
+
+web/node_modules/
+web-dist/

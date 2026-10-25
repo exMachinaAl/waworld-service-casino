@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>WORLD Arcade Engine · Dual Mode</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header class="top"><div class="brand"><span class="logo">W</span><div><b>WORLD ARCADE</b><small>ENGINE · DUAL MODE MVP</small></div></div><div id="status" class="status">Connecting…</div></header>
+<main class="wrap">
+ <section class="hero"><span class="eyebrow">STANDALONE GAME SERVICE</span><h1>One game. Two worlds.</h1><p>WhatsApp dan Web GUI memakai satu sesi, satu wallet ACR, dan satu engine. Semua saldo dan hadiah bersifat virtual serta tidak dapat diuangkan.</p></section>
+ <section id="connect-panel" class="card hidden"><h2>Hubungkan WhatsApp ke Web</h2><p id="connect-desc">Untuk melanjutkan, klaim permintaan ini dan konfirmasi di WhatsApp asli.</p><div class="code" id="claim-code">------</div><p id="claim-instructions" class="muted"></p><div class="actions"><button id="claim-btn">Klaim permintaan</button><button id="finalize-btn" class="outline hidden">Saya sudah menyetujui di WhatsApp</button></div></section>
+ <section id="logged-out" class="card hidden"><h2>Akses Web</h2><p>Gunakan <code>.wae web</code> melalui DM WA-WORLD untuk membuka situs ini secara aman. Mode demo di localhost tersedia hanya untuk pengembang.</p><button id="demo-btn" class="hidden">Masuk mode demo lokal</button></section>
+ <section id="app" class="hidden"><div class="cols"><div class="column">
+  <section class="card wallet"><div class="between"><h2>Dompet Arcade</h2><span class="pill">ACR ONLY</span></div><strong id="balance" class="large">—</strong><p class="muted">Terpisah dari VCUR WA-WORLD · Transfer ACR → VCUR dilarang</p></section>
+  <section class="card"><div class="between"><h2>Game Library</h2><span class="pill">MVP</span></div><div id="games" class="games"></div><div class="formrow"><label>ACR per putaran / ronde <select id="bet"><option value="5">5 ACR</option><option value="10" selected>10 ACR</option><option value="20">20 ACR</option><option value="50">50 ACR</option></select></label></div></section>
+  <section class="card"><h2>Sesi terbaru</h2><div id="sessions" class="sessions muted">Belum ada sesi</div></section>
+ </div><div class="column">
+  <section class="card game"><div class="between"><h2>Active Game</h2><span class="pill" id="state-version">No session</span></div><div id="game-board" class="board empty">Pilih game untuk memulai.</div><div id="game-actions" class="actions"></div><div class="muted tip">Setiap aksi divalidasi server. Jika dua perangkat mengirim aksi bersamaan, permintaan dengan versi lama ditolak.</div></section>
+  <section class="card"><h2>Kontrol Dual Mode</h2><p>Game yang dibuka di browser dan WhatsApp memiliki ID sesi sama. Untuk menghubungkan WA ke akun Web ini:</p><button class="outline" id="wa-link-btn">Aktifkan kontrol WA</button><div id="link-info" class="muted"></div></section>
+  <section class="card"><div class="between"><h2>Keamanan perangkat</h2><button id="refresh-devices" class="small outline">Segarkan</button></div><div id="devices" class="muted">Perangkat terhubung akan muncul di sini.</div><button id="logout" class="small danger">Keluar dari web</button></section>
+ </div></div></section>
+ <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+ <footer>WORLD Arcade Engine 0.1 MVP · Virtual Credits only · No deposits, trading, cashout, or VCUR conversion</footer>
+</main><script src="/app.js" type="module"></script></body></html>
