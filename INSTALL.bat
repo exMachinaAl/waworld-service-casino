@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 echo ================================================
-echo WORLD Arcade Engine v0.5 - Admin ACR Installation
+echo WORLD Arcade Engine v1.0.0-rc.3 - Release Candidate
 echo ================================================
 where node >nul 2>nul
 if errorlevel 1 (
@@ -11,6 +11,10 @@ if errorlevel 1 (
   exit /b 1
 )
 node scripts\setup.mjs
+if errorlevel 1 (pause & exit /b 1)
+node --experimental-sqlite scripts\migrate.mjs
+if errorlevel 1 (pause & exit /b 1)
+node --experimental-sqlite scripts\migrate-rc2.mjs
 if errorlevel 1 (pause & exit /b 1)
 node scripts\build-web.mjs
 if errorlevel 1 (

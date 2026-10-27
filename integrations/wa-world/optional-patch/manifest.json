@@ -1,0 +1,18 @@
+{
+  "id": "wae-connector-rc1",
+  "project": "wa-world-starter",
+  "build": "WAE-1.0.0-rc.1",
+  "migration": false,
+  "files": [
+    {
+      "path": "src/wa/handler.js",
+      "before": "5175b0d5f03a95b87d47c0500af21f091597470152a351e6790a1e384180c0be",
+      "after": "2cfe7f63737e8379db748263d5230716d782f7ca51aa8e8df9f2891cd061bf15"
+    },
+    {
+      "path": "src/wa/wae-adapter.mjs",
+      "before": null,
+      "after": "38f78d36f84c75c4cad711b19df9b09c7e2df558e2d88c8392c62968c9c50bb0"
+    }
+  ]
+}

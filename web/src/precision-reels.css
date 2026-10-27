@@ -1,0 +1,89 @@
+/* v0.8.0 Precision Reel Renderer. A column is one continuous measured strip. */
+.slot-stage .animated-reels,
+.scatter-board,
+.guci-reels,
+.blast-board {display:block}
+.precision-grid {
+  --precision-row-h:clamp(60px,7vw,78px);
+  --precision-gap:clamp(3px,1vw,8px);
+  --precision-cell-w:calc((100% - (var(--precision-cols) - 1) * var(--precision-gap)) / var(--precision-cols));
+  width:100%;min-width:0;display:grid;
+  grid-template-columns:repeat(var(--precision-cols),minmax(0,1fr));
+  gap:var(--precision-gap);align-items:stretch;position:relative;
+  contain:layout style;
+}
+.precision-scatter{--precision-row-h:clamp(39px,5.4vw,68px)}
+.precision-guci{--precision-row-h:clamp(47px,6vw,69px)}
+.precision-blast{--precision-row-h:clamp(48px,6vw,70px)}
+.precision-viewport{
+  position:relative;min-width:0;height:calc(var(--precision-row-h) * var(--precision-rows));
+  overflow:hidden;isolation:isolate;border-radius:8px;
+  border:1px solid #846b9a;background:#211c2d;
+  box-shadow:inset 0 8px 13px #fff1,inset 0 -8px 15px #0006;
+}
+.precision-track{position:relative;width:100%;display:flex;flex-direction:column;transform:translate3d(0,0,0);will-change:transform}
+.precision-symbol{
+  width:100%;height:var(--precision-row-h);min-height:var(--precision-row-h);
+  flex:0 0 var(--precision-row-h);display:grid;place-items:center;
+  font-size:clamp(22px,4vw,39px);line-height:1;
+  background:linear-gradient(165deg,#4c3a59,#292238 65%,#201c2e);
+  border-bottom:1px solid #89708e40;
+}
+.precision-symbol>span{display:grid;place-items:center;width:100%;height:100%;filter:drop-shadow(0 4px 4px #0008)}
+.precision-symbol.precision-mark{background:linear-gradient(155deg,#77513e,#422f43);box-shadow:inset 0 0 0 1px #ffd27999}
+.precision-glass{position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:linear-gradient(to bottom,#05060a47 0%,transparent 12%,transparent 84%,#06050b59 100%);
+  box-shadow:inset 0 1px 0 #ffffff20,inset 0 -1px 0 #ffffff12}
+.precision-pending .precision-viewport:after{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,transparent 10%,#f6e1ff18 48%,transparent 85%);
+  animation:precisionWaiting .48s linear infinite alternate;
+}
+.precision-pending .precision-symbol{filter:blur(1.5px)}
+.precision-viewport:focus-within{outline:2px solid #b497f1;outline-offset:2px}
+.precision-scatter .precision-symbol{font-size:clamp(17px,3.2vw,31px);background:linear-gradient(155deg,#443358,#241a34)}
+.precision-guci .precision-symbol{font-size:clamp(20px,3.6vw,34px);background:linear-gradient(140deg,#40304b,#18182d)}
+.precision-blast .precision-symbol{font-size:clamp(22px,4vw,37px);background:linear-gradient(145deg,#1a2149,#141832)}
+.precision-blast .precision-mark{background:linear-gradient(145deg,#765039,#32274a)}
+.precision-instant .precision-track{transition:none!important;animation:none!important}
+@keyframes precisionWaiting {from{transform:translateY(-15%);opacity:.35}to{transform:translateY(15%);opacity:.9}}
+@media(max-width:520px){
+ .precision-grid{--precision-row-h:clamp(57px,15vw,71px);--precision-gap:4px}
+ .precision-scatter{--precision-row-h:clamp(35px,10vw,50px);--precision-gap:3px}
+ .precision-guci,.precision-blast{--precision-row-h:clamp(43px,10vw,55px);--precision-gap:3px}
+ .precision-symbol{font-size:clamp(25px,7vw,34px)}
+ .precision-scatter .precision-symbol{font-size:clamp(16px,5.4vw,24px)}
+ .precision-guci .precision-symbol,.precision-blast .precision-symbol{font-size:clamp(19px,5vw,27px)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root:not([data-wae-motion="on"]) .precision-pending .precision-viewport:after{animation:none}
+}
+.reduce-motion .precision-pending .precision-viewport:after{animation:none!important}
+
+/* Test-only pixel guides: render actual row boundaries over the measured reel viewport. */
+:root[data-wae-reel-guide="on"] .precision-viewport:before{
+ content:'';position:absolute;inset:0;z-index:4;pointer-events:none;
+ background:repeating-linear-gradient(to bottom,transparent 0px,transparent calc(var(--precision-row-h) - 1px),#45e8dcaa calc(var(--precision-row-h) - 1px),#45e8dcaa var(--precision-row-h));
+ outline:1px solid #45e8dc99;outline-offset:-1px;
+}
+/* Ultimate Fusion: six columns with accurate per-viewport measured cell height. */
+.precision-fusion{--precision-row-h:clamp(38px,5.5vw,63px);--precision-gap:clamp(2px,.5vw,6px)}
+.precision-fusion .precision-symbol{font-size:clamp(17px,2.8vw,31px);background:linear-gradient(145deg,#332044,#19203e)}
+.precision-fusion .precision-mark{background:linear-gradient(145deg,#85582d,#3e255f)}
+@media(max-width:520px){.precision-fusion{--precision-row-h:clamp(34px,9vw,48px);--precision-gap:3px}.precision-fusion .precision-symbol{font-size:clamp(17px,4.8vw,25px)}}
+
+/* Win overlay follows physical measured row centers and exact CSS reel gaps. */
+.precision-winning-guides{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:visible}
+.precision-win-line{position:absolute;top:calc((var(--win-row) - .5) * var(--precision-row-h));left:calc((var(--win-start) - 1) * (var(--precision-cell-w) + var(--precision-gap)) + var(--precision-cell-w) / 2);width:calc((var(--win-count) - 1) * (var(--precision-cell-w) + var(--precision-gap)));height:3px;border-radius:4px;background:linear-gradient(90deg,#ffcc43,#fff5ad,#ffcf54);box-shadow:0 0 0 1px #553200,0 0 8px #fbbf24,0 0 17px #facb62;transform:translateY(-50%)}
+.precision-win-line:before,.precision-win-line:after{content:'';position:absolute;top:50%;height:10px;width:10px;border-radius:50%;background:#fff5c4;box-shadow:0 0 8px #ffd45b;transform:translate(-50%,-50%)}
+.precision-win-line:after{left:100%}
+.precision-win-pill{position:absolute;right:0;top:-23px;transform:translateX(8%);font-size:10px;font-weight:800;background:#17192d;color:#fff7d1;padding:2px 6px;border:1px solid #ffd15f;border-radius:5px;white-space:nowrap}
+.precision-symbol.precision-scatter-hit{background:linear-gradient(145deg,#9e672e,#4b315a);box-shadow:inset 0 0 0 2px #ffd46f,0 0 12px #ffbd3477;filter:none}
+.precision-scatter-marker{position:absolute;top:3px;right:3px;z-index:8;color:#fff5c2;background:#7c4e23;border:1px solid #ffe195;border-radius:5px;padding:1px 4px;font-size:10px;font-weight:800;pointer-events:none}
+@media(max-width:520px){.precision-win-pill{font-size:8px;padding:1px 3px;top:-16px}.precision-win-line{height:2px}}
+
+.precision-symbol:has(>span){}
+.precision-symbol:has(span:first-child){transition:background .2s}
+.precision-symbol.precision-mark:has(span){box-shadow:inset 0 0 0 2px #ffd879}
+
+.precision-symbol.precision-b-helper{background:linear-gradient(145deg,#19546d,#242454);box-shadow:inset 0 0 0 1px #91d6ff}

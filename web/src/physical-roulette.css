@@ -1,0 +1,23 @@
+/* v0.13: physically inspired wheel, ball rolls outside rotor, drops inward, bounces and lands. */
+.physical-roulette{background:radial-gradient(ellipse at 50% 34%,#58402369,transparent 58%),linear-gradient(145deg,#22262a,#12161d);text-align:center}
+.physical-roulette-area{margin:18px auto 22px;max-width:100%;display:grid;place-items:center;perspective:650px}
+.physical-wheel{width:min(350px,85vw);height:min(350px,85vw);position:relative;border-radius:50%;border:11px solid #80603b;box-shadow:0 0 0 3px #e5bb7a,0 0 0 9px #292019,0 29px 34px #0009,inset 0 4px 22px #000b;background:radial-gradient(circle,#452719 0%,#211a18 70%,#ad8150 94%,#22170f 100%);overflow:hidden;transform:rotateX(12deg)}
+.physical-stator{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent 70%,#a87d4c 72%,#271e1a 77%,#dbbb8a 79%,#332419 83%,#13100d 100%);z-index:2;pointer-events:none}
+.physical-rotor{position:absolute;inset:4%;width:92%;height:92%;z-index:1;transform:rotate(var(--landing-angle,0deg));transform-origin:center center;transform-box:fill-box;filter:drop-shadow(0 3px 4px #0009)}
+.physical-deflectors{position:absolute;inset:0;pointer-events:none;z-index:4;display:grid;place-items:center}
+.physical-deflectors span{position:absolute;width:10px;height:16px;background:linear-gradient(90deg,#f6d29b,#57432d);border:1px solid #e3c28e;border-radius:50%;box-shadow:0 0 5px #0009}
+.physical-ball-orbit{position:absolute;inset:0;z-index:8;pointer-events:none;transform:rotate(0deg)}
+.physical-ball{position:absolute;left:50%;top:2.8%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:radial-gradient(circle at 27% 22%,#fff,#fff6e8 30%,#c5bec0 66%,#3f4145 92%);border:1px solid #b7b6ad;box-shadow:0 4px 6px #000b,0 0 7px #ffecba80}
+.physical-ball i{position:absolute;inset:1px;border-radius:50%;box-shadow:inset 1px 1px 2px white}
+.physical-glint{position:absolute;inset:0;border-radius:50%;z-index:9;pointer-events:none;background:linear-gradient(140deg,#ffffff22,transparent 19%,transparent 76%,#ffd79913)}
+.roulette-moving .physical-rotor{animation:waeRotorDecel 4.8s cubic-bezier(.15,.05,.12,1) both}
+.roulette-moving .physical-ball-orbit{animation:waeBallOrbit 4.8s cubic-bezier(.23,.09,.15,1) both}
+.roulette-moving .physical-ball{animation:waeBallDrop 4.8s ease-out both}
+@keyframes waeRotorDecel{0%{transform:rotate(calc(var(--landing-angle) - 1440deg))}42%{transform:rotate(calc(var(--landing-angle) - 680deg))}75%{transform:rotate(calc(var(--landing-angle) - 120deg))}100%{transform:rotate(var(--landing-angle))}}
+@keyframes waeBallOrbit{0%{transform:rotate(0)}43%{transform:rotate(-950deg)}72%{transform:rotate(-1320deg)}84%{transform:rotate(-1410deg)}88%{transform:rotate(-1445deg)}92%{transform:rotate(-1433deg)}96%{transform:rotate(-1443deg)}100%{transform:rotate(-1440deg)}}
+@keyframes waeBallDrop{0%,61%{top:2.8%}70%{top:5%}82%{top:10%}88%{top:13.8%}92%{top:18.2%}96%{top:14.1%}100%{top:15.2%}}
+.physical-roulette-disclaimer{color:#aaa4a0;font-size:10px;line-height:1.6;margin:4px auto 20px;max-width:330px}
+.reduce-motion .physical-rotor,.reduce-motion .physical-ball-orbit,.reduce-motion .physical-ball{animation:none!important}
+.reduce-motion .physical-ball{top:15.2%}
+@media(max-width:520px){.physical-wheel{width:min(300px,79vw);height:min(300px,79vw)}.physical-deflectors span{display:none}}
+@media(prefers-reduced-motion:reduce){:root:not([data-wae-motion="on"]) .physical-roulette *{animation:none!important}}

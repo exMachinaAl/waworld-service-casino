@@ -8,7 +8,7 @@ if not exist .env (
 )
 node scripts\require-web-build.mjs
 if errorlevel 1 (pause & exit /b 1)
-echo WORLD Arcade Engine v0.5 - Admin ACR Toolkit
+echo WORLD Arcade Engine v1.0.0-rc.3 - Release Candidate
 echo Open http://127.0.0.1:8787
 echo Backend dan frontend berjalan di port yang SAMA.
 node --experimental-sqlite src\server.mjs

@@ -9,7 +9,7 @@ const require=createRequire(import.meta.url);
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 let ts;
 try{ts=require('typescript');}catch{console.log('[SKIP] TypeScript checker tidak ada; Vite build memvalidasi JSX saat instalasi.');process.exit(0)}
-const files=['web/src/App.jsx','web/src/main.jsx','web/src/components/GamePanel.jsx','web/src/components/GameStages.jsx','web/src/components/AdminView.jsx'];
+const files=['web/src/App.jsx','web/src/main.jsx','web/src/components/GamePanel.jsx','web/src/components/GameStages.jsx','web/src/components/PrecisionReels.jsx','web/src/components/AdminView.jsx','web/src/components/MultiplayerLobby.jsx','web/src/components/MultiplayerHub.jsx','web/src/components/BlackjackLobby.jsx','web/src/components/PhysicalRoulette.jsx'];
 let errors=0;
 for(const file of files){
  const source=readFileSync(path.join(root,file),'utf8');

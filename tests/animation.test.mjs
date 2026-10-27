@@ -5,7 +5,7 @@ import {animationDuration,isNewVersion,preferReducedMotion,saveMotionPreference,
 test('Animation durations are presentation-only; reduced-motion is instantaneous',()=>{
  assert.equal(animationDuration('A1-01'),1800);
  assert.equal(animationDuration('A1-02'),2200);
- assert.equal(animationDuration('B1'),2400);
+ assert.equal(animationDuration('B1'),4800);
  assert.equal(animationDuration('B2'),850);
  assert.equal(animationDuration('B2',true),0);
  assert.equal(animationDuration('unknown'),600);

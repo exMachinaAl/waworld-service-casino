@@ -1,5 +1,5 @@
 /** Presentation-only timing. No RNG, balance edits, or game decision logic here. */
-export const GAME_MOTION_MS = Object.freeze({'A1-01':1800,'A1-02':2200,'B1':2400,'B2':850});
+export const GAME_MOTION_MS = Object.freeze({'A1-01':1800,'A1-02':2200,'A1-03':1550,'A1-04':1950,'A1-05':2400,'B1':4800,'B2':850});
 export function animationDuration(gameCode, reducedMotion=false) {
   return reducedMotion ? 0 : (GAME_MOTION_MS[gameCode] ?? 600);
 }

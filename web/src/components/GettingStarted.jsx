@@ -1,0 +1,9 @@
+import React,{useState} from 'react';
+import {BookOpen,CheckCircle2,ChevronRight,ShieldCheck,X} from 'lucide-react';
+const KEY='wae-rc3-onboarding-dismissed';
+export default function GettingStarted({balance=0,sessions=[],navigate}){
+ const [hidden,setHidden]=useState(()=>{try{return localStorage.getItem(KEY)==='yes'}catch{return false}});
+ if(hidden)return <button type="button" className="rc3-open-welcome" onClick={()=>{try{localStorage.removeItem(KEY)}catch{}setHidden(false)}}><BookOpen size={16}/> Tampilkan panduan awal</button>;
+ const steps=[{label:'Baca aturan',detail:'Pelajari game dan syarat bonus sebelum memilih taruhan.',to:'help',done:false},{label:'Siapkan ACR',detail:'Lihat saldo, transaksi, dan ketentuan penggunaan.',to:'wallet',done:Number(balance)>0},{label:'Mulai permainan',detail:'Pilih game atau ronde yang sudah tersedia.',to:'games',done:sessions.length>0},{label:'Lanjutkan sesi',detail:'Periksa sesi yang tersimpan dan sinkronisasi state.',to:'sessions',done:sessions.length>0}];
+ return <section className="panel rc3-welcome" aria-label="Panduan memulai"><div className="rc3-welcome-title"><div><span className="eyebrow">PANDUAN PEMAIN BARU · RC3</span><h2>Mulai dari sini</h2><p>Ikuti langkah berikut untuk mencoba WORLD Arcade tanpa kebingungan.</p></div><button type="button" className="icon-button" aria-label="Sembunyikan panduan" onClick={()=>{try{localStorage.setItem(KEY,'yes')}catch{}setHidden(true)}}><X size={18}/></button></div><div className="rc3-steps">{steps.map((s,i)=><button key={s.label} type="button" onClick={()=>navigate(s.to)} className="rc3-step"><span className="rc3-step-index">{s.done?<CheckCircle2 size={20}/>:i+1}</span><span><strong>{s.label}</strong><small>{s.detail}</small></span><ChevronRight size={18}/></button>)}</div><p className="rc3-privacy"><ShieldCheck size={15}/> Panduan boleh disembunyikan. Preferensi ini tersimpan hanya di browser; bukan token akun atau saldo.</p></section>;
+}

@@ -1,6 +1,6 @@
 {
   "name": "world-arcade-engine",
-  "version": "0.5.0-admin-acr",
+  "version": "1.0.0-rc.3",
   "private": true,
   "type": "module",
   "description": "Standalone virtual-credit arcade with WhatsApp/Web session handoff",
@@ -13,6 +13,9 @@
     "check": "node --experimental-sqlite scripts/check.mjs && node scripts/check-web.mjs",
     "build:web": "node scripts/build-web.mjs",
     "dev:web": "npm --prefix web run dev",
-    "test:web:source": "node scripts/check-web.mjs"
+    "test:web:source": "node scripts/check-web.mjs",
+    "migrate": "node --experimental-sqlite scripts/migrate.mjs",
+    "test:browser": "node scripts/browser-test.mjs",
+    "migrate:rc2": "node --experimental-sqlite scripts/migrate-rc2.mjs"
   }
 }

@@ -1,3 +1,4 @@
+import {setupRcSchema} from './rc-schema.mjs';
 import {DatabaseSync} from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,6 +26,7 @@ export function openDb(filename=':memory:'){
  db.prepare('INSERT OR IGNORE INTO tenants(id,slug) VALUES(?,?)').run('wa-world','wa-world');
  db.prepare('INSERT OR IGNORE INTO accounts(id,tenant_id,owner_id,kind,balance) VALUES(?,?,?,?,?)').run('wa-faucet','wa-world',null,'FAUCET',2000000);
  db.prepare('INSERT OR IGNORE INTO accounts(id,tenant_id,owner_id,kind,balance) VALUES(?,?,?,?,?)').run('wa-treasury','wa-world',null,'TREASURY',800000);
+ setupRcSchema(db);
  return db;
 }
 export function transaction(db,fn){db.exec('BEGIN IMMEDIATE');try{const out=fn();db.exec('COMMIT');return out;}catch(e){db.exec('ROLLBACK');throw e;}}
@@ -32,13 +34,15 @@ export function audit(db,event,detail={},tenant='wa-world'){db.prepare('INSERT I
 function acct(db,tenant,owner,kind){return db.prepare('SELECT * FROM accounts WHERE tenant_id=? AND kind=? AND owner_id IS ?').get(tenant,kind,owner);}
 export function wallet(db,playerId,tenant='wa-world'){return acct(db,tenant,playerId,'PLAYER')?.balance??0;}
 export function transfer(db,{tenant='wa-world',from,to,amount,eventKey,reason}){
- assert(Number.isSafeInteger(amount)&&amount>0&&amount<=100000,400,'INVALID_AMOUNT');
+ assert(Number.isSafeInteger(amount)&&amount>0&&amount<=1000000000000,400,'INVALID_AMOUNT');
  // Caller wraps in transaction; enforce no unauthorized currency or cross-tenant writes.
  const existing=db.prepare('SELECT id FROM transfers WHERE tenant_id=? AND event_key=?').get(tenant,eventKey);
  if(existing)return {reused:true};
  const src=db.prepare('SELECT * FROM accounts WHERE id=? AND tenant_id=?').get(from,tenant);
  const dst=db.prepare('SELECT * FROM accounts WHERE id=? AND tenant_id=?').get(to,tenant);
  assert(src&&dst,400,'INVALID_ACCOUNTS');assert(src.balance>=amount,409,'INSUFFICIENT_ACR');assert(from!==to,400,'SAME_ACCOUNT');
+ assert(Number.isSafeInteger(dst.balance+amount),400,'BALANCE_OVERFLOW');
+ if(from==='wa-treasury'){const reserved=db.prepare('SELECT COALESCE(SUM(amount),0) n FROM treasury_reserves WHERE tenant_id=?').get(tenant).n;assert(src.balance-amount>=reserved,409,'TREASURY_RESERVED');}
  const id=uuid();db.prepare('INSERT INTO transfers VALUES(?,?,?,?,?)').run(id,tenant,eventKey,reason,now());
  db.prepare('UPDATE accounts SET balance=balance-? WHERE id=?').run(amount,from);
  db.prepare('UPDATE accounts SET balance=balance+? WHERE id=?').run(amount,to);

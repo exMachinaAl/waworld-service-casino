@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.1 — Lottery, custom stakes, multiplayer and safe upgrade
+
+Implementasi dan perubahan kontrak terbaru ada di [docs/rc1/CHANGELOG.md](docs/rc1/CHANGELOG.md). Bukti dan batas penerimaan ada di [docs/rc1/READINESS.md](docs/rc1/READINESS.md). Bagian v0.x di bawah adalah arsip historis.
+
 ## 0.3.0 — React Animation Update
 
 - Slot A1-01: cinematic cabinet, staggered animated reels, anticipation effect, winner highlight, confetti for server-confirmed winning rounds.

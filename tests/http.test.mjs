@@ -10,7 +10,7 @@ test('HTTP: handoff, login, authenticated game, and guarded internal service',as
   const json=await r.json();return {status:r.status,json,cookie:r.headers.get('set-cookie')};
  };
  try{
-  const health=await call('GET','/api/v1/health');assert.equal(health.status,200);assert.equal(health.json.version,'0.5.0-admin-acr');
+  const health=await call('GET','/api/v1/health');assert.equal(health.status,200);assert.equal(health.json.version,'1.0.0-rc.2');
   const home=await fetch(base+'/');assert.ok([200,503].includes(home.status));
   if(home.status===503)assert.match(await home.text(),/React Web UI belum dibangun/);
   assert.equal((await call('POST','/internal/v1/handoffs',{subject:'tester@s.whatsapp.net'})).status,401);
@@ -29,6 +29,20 @@ test('HTTP: handoff, login, authenticated game, and guarded internal service',as
   assert.equal(scatterSpin.status,200);
   assert.equal(scatterSpin.json.session.last.grid.length,4);
   assert.equal(scatterSpin.json.session.last.grid[0].length,6);
+  assert.ok(catalog.json.games.some(g=>g.code==='A1-05'));
+  const fusion=await call('POST','/api/v1/sessions',{game_code:'A1-05',bet:10},{Cookie:browserCookie});
+  assert.equal(fusion.status,201);
+  const fusionSpin=await call('POST',`/api/v1/sessions/${fusion.json.session.id}/actions`,{command_id:'http-fusion-spin-1234567',expected_version:1,action:'SPIN',bet:10},{Cookie:browserCookie});
+  assert.equal(fusionSpin.status,200);
+  assert.equal(fusionSpin.json.session.last.grid_before.length,4);
+  assert.equal(fusionSpin.json.session.last.grid_after[0].length,6);
+  assert.ok(catalog.json.games.some(g=>g.code==='A1-04'));
+  const blast=await call('POST','/api/v1/sessions',{game_code:'A1-04',bet:10},{Cookie:browserCookie});
+  assert.equal(blast.status,201);
+  const blastSpin=await call('POST',`/api/v1/sessions/${blast.json.session.id}/actions`,{command_id:'http-blast-spin-1234567',expected_version:1,action:'SPIN',bet:10},{Cookie:browserCookie});
+  assert.equal(blastSpin.status,200);
+  assert.equal(blastSpin.json.session.last.grid_before.length,4);
+  assert.equal(blastSpin.json.session.last.grid_after[0].length,5);
   const game=await call('POST','/api/v1/sessions',{game_code:'A1-01',bet:10},{Cookie:browserCookie});assert.equal(game.status,201);
   const sess=game.json.session;
   const action={command_id:'http-test-idempotent-1234',expected_version:sess.version,action:'SPIN',bet:10};
