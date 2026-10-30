@@ -11,6 +11,7 @@ Implementasi Node.js + SQLite + React/Vite, ACR virtual tertutup. Windows: INSTA
 - [Patch konektor WA-WORLD opsional](docs/rc1/WA-CONNECTOR.md)
 - [Matriks pengujian](docs/rc1/TEST-MATRIX.md)
 - [Pemeriksaan keamanan](docs/rc1/SECURITY.md)
+- [Roadmap WAW, desain simulasi aman, dan panduan dompet VAL (Virtual AL)](docs/waw/README.md) — rancangan pengembangan, belum fitur aktif.
 
 Lottery default OFF. Admin lokal: WAE_ADMIN_ENABLED=1 + ADMIN-SETUP.bat. Grant test tetap OFF. Tidak ada konversi ACR–VCUR, deposit/cash-out, perdagangan kredit, atau hadiah bernilai nyata.
 
