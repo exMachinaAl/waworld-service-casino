@@ -6,6 +6,10 @@ Tanggal rancangan: 29 Oktober 2026. Status: **proposal dan panduan implementasi*
 
 ## Urutan baca
 
+Untuk cara menyerahkan source dan menjalankan pekerjaan, mulai dari [panduan ZIP → ChatGPT → agent di folder](../UPGRADE-WORKFLOW.md).
+
+Hasil pengerjaan aktual: [status implementasi dan pengujian](IMPLEMENTATION-STATUS.md), dimulai dari stabilitas scheduler multiplayer. Rancangan VAL di bawah tetap belum menjadi fitur aktif.
+
 1. [Roadmap upgrade dan desain bermain aman](ROADMAP.md): temuan proyek, prioritas, tahapan, dan syarat rilis.
 2. [Panduan khusus e-wallet VAL](VAL-WALLET.md): konsep dasar, ledger, arsitektur, API usulan, dan migrasi ACR.
 3. [Lab QR VAL, DANA, dan QRIS](QR-PAYMENT-LAB.md): alur scan–konfirmasi–receipt, sandbox, dan pemisahan dari pembayaran nyata.
@@ -34,7 +38,7 @@ Nama keluarga **WAW** berasal dari permintaan pemilik. Hubungan merek dengan nam
 
 | Komponen | Bukti lokal | Implikasi |
 |---|---|---|
-| Arcade RC3 | [package.json](../../package.json), [panduan RC3](../rc3/UPGRADE_RC3.md) | Node.js + SQLite + React/Vite; README utama masih berjudul RC1 |
+| Arcade RC3 | [package.json](../../package.json), [panduan RC3](../rc3/UPGRADE_RC3.md) | Node.js + SQLite + React/Vite; judul README diselaraskan dengan package RC3 pada 31 Oktober 2026 |
 | Ledger ACR | [src/db.mjs](../../src/db.mjs) | Akun, transfer dua sisi, transaksi SQLite, audit dan outbox sudah ada |
 | Cadangan kewajiban | [model database](../rc1/DATABASE.md), [baseline](../rc1/BASELINE-AND-DECISIONS.md) | Migrasi harus mempertahankan saldo, sesi, dan kewajiban lama |
 | Auto-spin | [web/src/auto-spin.mjs](../../web/src/auto-spin.mjs) | Preset 10/30/50/100 dan pencarian bonus maksimum 500; batas UI bukan pengaman lintas kanal |

@@ -2,6 +2,59 @@
 
 Status: rancangan 29 Oktober 2026. Indeks: [WAW & VAL](README.md).
 
+## Prioritas proyek: stabilisasi dahulu, fitur bertahap
+
+Penajaman prioritas: 31 Oktober 2026. **Mulai dari baseline yang dapat dijalankan dan perbaikan bug terkonfirmasi, lalu perlindungan bermain dan integrasi VAL Arcade.** Penambahan game, QR dan perluasan WA-WORLD menunggu fondasi terkait lulus. Ini keputusan perencanaan; sesi pembaruan ini hanya mengubah dokumentasi.
+
+Pembaruan implementasi: tahap awal stabilitas scheduler multiplayer sudah dikerjakan setelah peninjauan ini; lihat [status implementasi dan bukti 112 tes](IMPLEMENTATION-STATUS.md). Tabel peninjauan di bawah tetap merupakan baseline sebelum perbaikan tersebut.
+
+Proyek sudah memiliki banyak game, multiplayer, wallet ACR, admin dan konektor. Nilai upgrade terdekat adalah memastikan alur yang ada dapat dipasang, digunakan, dipulihkan dan diuji dengan konsisten. Jangan menetapkan target “nol semua bug” tanpa batas: setelah blocker kritis teratasi dan kriteria tahap lulus, lanjutkan fitur berikutnya sambil mencatat masalah kecil yang tersisa.
+
+### Bukti saat peninjauan
+
+| Pemeriksaan | Hasil aktual | Makna untuk roadmap |
+|---|---|---|
+| `package.json` | Versi 1.0.0-rc.3; Node >=22.16.0 | Baseline rilis harus diambil dari source aktual |
+| Runtime setelah pembaruan | Node v24.22.1 melalui NVM, npm 11.19.1 | Memenuhi syarat; shell agent perlu memuat NVM atau PATH bin versi tersebut |
+| `npm test` setelah pembaruan | 108 PASS, 0 FAIL, 0 skipped | Dijalankan di luar sandbox dengan izin membuka localhost; kegagalan awal `listen EPERM` berasal dari pembatasan sandbox |
+| `npm run check` setelah pembaruan | PASS, dengan WARN bundle RC3 belum dibangun | Pemeriksaan source lulus; belum membuktikan build/browser |
+| `node scripts/check-web.mjs` | Lulus pemeriksaan source, WARN bundle RC3 belum dibangun | Belum membuktikan build atau perilaku browser |
+| Windows, browser, WA nyata, load dan restore baru | Tidak dijalankan pada peninjauan ini | Bukti historis RC1/RC2 tidak menjadi hasil verifikasi RC3 terbaru |
+| Auto-spin | Source masih ada; check source juga mensyaratkan `startAuto` | Perubahan desain perlu mengubah kode dan ekspektasi pemeriksaan bersama |
+
+Belum ada bug fungsional baru yang berhasil direproduksi dalam peninjauan terbatas ini. Defisit treasury yang disebut dokumen RC1 adalah temuan snapshot lama, bukan hasil pemeriksaan database saat ini. Hindari membuat tiket “saldo rusak” atau “game gagal” hanya dari dugaan.
+
+### Antrean kerja terdekat untuk AI dan agent
+
+| Urutan | Jenis pekerjaan | Scope konkret | Kriteria selesai |
+|---|---|---|---|
+| A — Baseline RC3 | Validasi lingkungan/rilis | Gunakan Node yang memenuhi syarat pada staging; jalankan test, check, build dan smoke test; inventaris backup/restore | Hasil tiap perintah tercatat, kegagalan lingkungan dibedakan dari bug, daftar blocker tersedia |
+| B — Bug terkonfirmasi | Perbaikan | Reproduksi temuan A; prioritaskan kehilangan/duplikasi saldo, akses tanpa hak, gagal startup/migrasi dan sesi macet bila benar-benar ditemukan | Reproduksi gagal sebelum fix dan lulus sesudahnya; regresi relevan lulus; tidak mengubah hak payout/RNG |
+| C — Perlindungan | Upgrade perilaku | WAW-02..05: guard backend, batas/jeda/blokir, penyelesaian kewajiban dan UI manual | Tidak dapat dibypass lewat WA/tab/restart; kewajiban lama tetap selesai |
+| D — VAL Arcade | Fitur inti | VAL-01..04: kontrak wallet, integrasi debit/payout, history/receipt/UI dan migrasi teruji | Saldo lama tetap 1:1; retry, reserve, otorisasi dan rekonsiliasi lulus; bukan hanya rename ACR |
+| E — Perluasan | Fitur lanjutan | WA-WORLD setelah D; lab QR terpisah bila diperlukan | Kontrak inti stabil; pengujian integrasi sesuai kanal tersedia |
+
+A memetakan fase 0 di bawah; B berada di dalam fase yang terdampak dan dapat memotong antrean bila ditemukan bug kritis. C/D memetakan fase 1/2. Fase lab bersifat opsional dan tidak menghalangi integrasi inti Arcade maupun pekerjaan WA yang tidak bergantung padanya. Beta dan ekstraksi layanan mengikuti gate fase 5/6.
+
+### Aturan memilih fix atau fitur
+
+- **Dahulukan fix** bila bug terkonfirmasi memengaruhi saldo/ledger, otorisasi, penyelesaian hak, backup/restore, instalasi atau alur utama. Hentikan perluasan pada area terdampak sampai ada perbaikan dan bukti uji.
+- **Perbaiki lingkungan** bila kegagalan berasal dari versi Node, dependency, build yang belum ada atau alat uji yang tidak tersedia. Catat sebagai hambatan verifikasi, jangan mengubah logika game untuk mengatasinya.
+- **Lanjutkan fitur kecil** bila baseline relevan lulus dan tidak ada blocker kritis pada jalurnya. Utamakan kejelasan saldo, receipt, error/retry dan panduan berdasarkan temuan penggunaan; jangan menduplikasi fitur yang sudah ada.
+- **Tunda perluasan besar** seperti game baru, QR, transfer lintas produk dan microservices sampai fondasi yang dibutuhkan terbukti. Fitur baru tidak boleh menjadi jalan menghindari bug lama.
+
+Prioritas triase: **P0** kehilangan/duplikasi nilai virtual, akses tanpa hak, atau korupsi data; **P1** alur utama/install/settlement gagal tanpa jalan pemulihan yang layak; **P2** gangguan nonkritis dengan workaround; **P3** kosmetik. Ini tingkat urgensi bug, berbeda dari label prioritas deliverable pada backlog. Gunakan dampak nyata dan reproduksi untuk menentukan tingkatnya.
+
+### Kontrak tugas per sesi AI
+
+Satu sesi menangani satu hasil konkret: audit baseline, satu kelompok bug dengan penyebab terkait, atau satu fitur yang dapat diuji. Brief harus memuat versi/snapshot asal, gejala atau kebutuhan, scope file, dependensi, skenario penerimaan dan output yang diminta. Ikuti [alur ZIP dan agent di folder](../UPGRADE-WORKFLOW.md).
+
+Untuk bug, tulis langkah reproduksi, expected/actual, bukti tersanitasi, dampak, dan status **dugaan / terkonfirmasi / diperbaiki / terverifikasi**. Untuk fitur, tulis perubahan perilaku pengguna, kompatibilitas, migrasi bila ada, dan syarat selesai. AI chat memperjelas brief; agent mengerjakan source ketika implementasi diminta.
+
+Hasil implementasi berikutnya dicatat di `docs/waw/IMPLEMENTATION-STATUS.md`: baseline, file berubah, hasil perintah, bug tersisa, status migrasi dan tugas selanjutnya. File tersebut belum diwajibkan berisi hasil implementasi pada sesi dokumentasi ini. Jangan menandai tahap selesai hanya berdasarkan rencana atau status tes historis.
+
+**Tugas implementasi pertama yang disarankan:** A — validasi baseline RC3 pada runtime yang sesuai, kemudian susun daftar bug berdasarkan bukti. Pilih bug paling berdampak dari daftar itu untuk tugas B; bila tidak ada blocker, lanjutkan C dan fondasi D. Pembuatan tool upgrader otomatis belum menjadi prasyarat.
+
 ## Sasaran pengalaman
 
 Pertahankan kesenangan dari visual yang rapi, aturan yang mudah dipahami, permainan sosial, latihan strategi, dan akses yang cepat. Ukuran sukses utama adalah pemain memahami hasil dan dapat berhenti sesuai niatnya. Jangan memakai jumlah spin, kerugian, atau durasi terpanjang sebagai sasaran optimasi.

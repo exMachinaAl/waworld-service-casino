@@ -1,5 +1,7 @@
 # Prompt memulai EV-wallet VAL
 
+Persiapan paket, prompt tugas ZIP, dan perpindahan ke agent lokal dijelaskan dalam [panduan upgrade ZIP dan folder](../UPGRADE-WORKFLOW.md). Gunakan satu baseline yang sama saat berpindah sesi dan sertakan catatan hasil pengujian aktual.
+
 Salin seluruh blok di bawah ke sesi pengembangan baru. Jika bekerja melalui workspace ini, arahkan sesi ke folder proyek Arcade. Jika sesi tidak memiliki akses file, sertakan source proyek dan dokumen `docs/waw/` melalui fasilitas yang tersedia, tanpa `.env`, database pemain, atau kredensial WA.
 
 Prompt ini memprioritaskan implementasi kasino. Lab QR dan integrasi WA-WORLD adalah tahap lanjutan, bukan syarat untuk mulai membangun dompet.

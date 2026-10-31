@@ -1,7 +1,6 @@
 import {migrateActiveLiabilities} from './migrations.mjs';
 import {rcAdmin,rcPlayer,isRcRoute} from './rc-api.mjs';
-import {sweepLottery} from './lottery.mjs';
-import {sweepRoulette} from './roulette-rounds.mjs';
+import {sweepScheduledRounds} from './scheduled-rounds.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {openDb,transaction,ensurePlayer,wallet,checkLedger} from './db.mjs';
 import {games,createGame,getSession,sessionsFor,act} from './games.mjs';
 import {setupRooms,createRoom,roomInfo,roomPreview,myRooms,publicRooms,joinRoom,roomAction} from './rooms.mjs';
-import {setupBlackjackTables,createBlackjackTable,blackjackTableInfo,blackjackTablePreview,blackjackMyTables,blackjackPublicTables,joinBlackjackTable,blackjackTableAction,sweepBlackjackTimeouts} from './blackjack-tables.mjs';
+import {setupBlackjackTables,createBlackjackTable,blackjackTableInfo,blackjackTablePreview,blackjackMyTables,blackjackPublicTables,joinBlackjackTable,blackjackTableAction} from './blackjack-tables.mjs';
 import {createHandoff,claimHandoff,approveHandoff,finalizeHandoff,handoffStatus,pendingForWa,browserPlayer,revokeSession,devices,revokeDevice,makeWaLink,claimWaLink,confirmWaLink,waLinkStatus,approveWaLinkWeb} from './auth.mjs';
 import {token,uuid,parse,json,digest,now,assert,fail,equal,HttpError} from './util.mjs';
 import {setupDraw,drawQuota,DRAW_POLICY} from './number-draw.mjs';
@@ -305,7 +304,7 @@ export function createApp({database=':memory:',serviceKey=process.env.WAE_SERVIC
    jsonResponse(res,status,{error:err.code||'INTERNAL_ERROR',message:status>=500?'An internal error occurred':err.message});
   }
  });
- const blackjackSweep=setInterval(()=>{try{sweepBlackjackTimeouts(db);sweepLottery(db);sweepRoulette(db)}catch(e){console.error('[WAE blackjack sweep]',e)}},1000);blackjackSweep.unref();
+ const blackjackSweep=setInterval(()=>{try{sweepScheduledRounds(db)}catch(e){console.error('[WAE round sweep]',e)}},1000);blackjackSweep.unref();
  return {server,db,close:()=>new Promise(resolve=>{clearInterval(blackjackSweep);server.close(()=>{db.close();resolve();});})};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){

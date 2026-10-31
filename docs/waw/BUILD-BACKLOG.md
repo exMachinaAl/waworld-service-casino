@@ -1,8 +1,18 @@
 # Backlog pembangunan awal
 
-Status semua pekerjaan di bawah: **belum dikerjakan**. Dokumen perencanaan tidak mengaktifkan fitur. Indeks: [WAW & VAL](README.md).
+Status deliverable WAW/VAL/LAB/OPS di bawah: **belum dikerjakan**. Validasi baseline dan perbaikan scheduler multiplayer sudah dimulai; lihat [status implementasi](IMPLEMENTATION-STATUS.md). Dokumen perencanaan tidak mengaktifkan fitur. Indeks: [WAW & VAL](README.md).
 
 ## Urutan issue
+
+Sebelum mengambil fitur, ikuti [prioritas stabilisasi pada roadmap](ROADMAP.md#prioritas-proyek-stabilisasi-dahulu-fitur-bertahap). Urutan terdekat adalah validasi RC3 → fix bug terkonfirmasi → perlindungan → VAL Arcade. Lab QR dapat ditunda; bukan syarat integrasi wallet Arcade.
+
+| ID persiapan | Jenis | Hasil yang diminta | Syarat selesai |
+|---|---|---|---|
+| BASE-01 | Lingkungan | Staging dengan Node >=22.16.0, dependency dan baseline source teridentifikasi | Test/check dapat dieksekusi; hambatan lingkungan tercatat |
+| BASE-02 | Verifikasi | Hasil test, check, build, smoke test dan inventaris pemulihan aktual | Daftar PASS/FAIL/BELUM DIJALANKAN serta bukti reproduksi temuan |
+| FIX-xxx | Bug, dibuat setelah reproduksi | Satu tiket per penyebab/kelompok gejala terkait | Expected/actual jelas; fix dan uji regresi relevan lulus |
+
+Pembaruan verifikasi 31 Oktober 2026: Node telah diperbarui dari v20.19.2 ke v24.22.1 melalui NVM (npm 11.19.1). `npm test` lulus 108/108 tanpa skip setelah diizinkan membuka localhost di luar sandbox; kegagalan awal `listen EPERM` merupakan batas lingkungan, bukan bug game. `npm run check` lulus dengan peringatan bundle belum dibangun. Hambatan runtime teratasi, tetapi BASE-01/02 belum ditutup sepenuhnya: dependency/build frontend, smoke test dan bukti pemulihan masih perlu diverifikasi. Shell agent perlu memuat NVM atau PATH Node yang sesuai. Jangan membuat tiket FIX fiktif untuk memenuhi antrean. WAW-01 tetap mencakup backup/restore staging; BASE melengkapinya dengan bukti runtime dan pemeriksaan rilis.
 
 P0 = syarat sebelum beta; P1 = fondasi integrasi; P2 = perluasan setelah fondasi lulus.
 
@@ -14,8 +24,8 @@ P0 = syarat sebelum beta; P1 = fondasi integrasi; P2 = perluasan setelah fondasi
 | WAW-04 | P0 | UI manual, timer, hasil bersih, sembunyikan kasino | 03 | Tidak ada kontrol auto-spin atau ajakan mengejar bonus; aksesibilitas dan mobile diuji |
 | WAW-05 | P0 | Penyelesaian kewajiban saat blokir | 03 | Bonus/blackjack/roulette/lottery yang sudah mengikat dapat selesai tanpa taruhan baru |
 | VAL-01 | P1 | Metadata VAL dan pocket, compatibility contract | WAW-01 | ACR lama tetap terbaca; unit/pocket eksplisit di kontrak baru |
-| VAL-02 | P1 | Modul ledger dan idempotency konsisten | VAL-01 | Transfer atomik, fingerprint mismatch ditolak, seluruh akun dapat direkonsiliasi |
-| VAL-03 | P1 | Riwayat, receipt, pagination, otorisasi | VAL-02 | Pengguna A tidak membaca receipt pribadi B; IDOR tests lulus |
+| VAL-02 | P1 | Modul ledger, integrasi debit/payout/refund Arcade dan idempotency konsisten | VAL-01 | Jalur instan/bonus/multiplayer/terjadwal terinventaris; transfer atomik, fingerprint mismatch ditolak, seluruh akun dapat direkonsiliasi |
+| VAL-03 | P1 | API dan UI wallet: saldo posted/held/available, riwayat, receipt, pagination, otorisasi | VAL-02 | Saldo berasal dari server; loading/error/retry/mobile teruji; pengguna A tidak membaca receipt pribadi B; IDOR tests lulus |
 | LAB-01 | P1 | Faucet dan P2P sintetis terisolasi | VAL-02 | Hanya akun lab; kuota tidak ter-reset oleh retry; tidak ada rute lab publik |
 | LAB-02 | P1 | QR dinamis, intent, konfirmasi, refund | LAB-01, VAL-03 | Dua konfirmasi bersamaan hanya satu settlement; refund tidak berlebih |
 | WAW-06 | P1 | Mapping identitas dan adapter WA | WAW-03, VAL-03 | DM dan identity binding terverifikasi, VCUR tidak berubah |

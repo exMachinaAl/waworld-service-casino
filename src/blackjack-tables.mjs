@@ -170,11 +170,19 @@ export function blackjackTableAction(db,p,ref,{action,expected_version,command_i
 }
 export function sweepBlackjackTimeouts(db){
  transaction(db,()=>{for(const t of db.prepare("SELECT * FROM bj_tables WHERE status='OPEN' AND expires_ms<=?").all(now()))stamp(db,t,{phase:'CANCELLED',reason:'TABLE_EXPIRED'},'CANCELLED');});
- const expired=db.prepare("SELECT id,state_json FROM bj_tables WHERE status='PLAYING' ORDER BY updated_ms LIMIT 100").all();let processed=0;
- for(const row of expired){const st=parse(row.state_json);if(!st.turn_deadline_ms||st.turn_deadline_ms>now())continue;
+ // Scan every active table: a limit before checking deadlines can starve due turns.
+ const active=db.prepare("SELECT id,state_json FROM bj_tables WHERE status='PLAYING' ORDER BY updated_ms,id").all();let processed=0;
+ const failures=[];
+ for(const row of active){try{
+  const st=parse(row.state_json);assert(Number.isSafeInteger(st?.turn_deadline_ms),500,'TURN_INVARIANT');
+  if(st.turn_deadline_ms>now())continue;
   const t=lookup(db,row.id),m=members(db,t.id),actor=m[0]?.player_id;
-  if(!actor)continue;
-  try{blackjackTableAction(db,actor,t.id,{action:'TIMEOUT',expected_version:t.version,command_id:`bj:sweep:${t.id}:${t.version}`});processed++;}catch(error){if(!['TABLE_STATE_STALE','TURN_NOT_EXPIRED'].includes(error.code))throw error;}
- }
+  assert(actor,500,'TABLE_MEMBERS_INVARIANT');
+  blackjackTableAction(db,actor,t.id,{action:'TIMEOUT',expected_version:t.version,command_id:`bj:sweep:${t.id}:${t.version}`});processed++;
+ }catch(error){
+  if(!['TABLE_STATE_STALE','TURN_NOT_EXPIRED'].includes(error.code))failures.push(new Error(`Blackjack timeout failed for table ${row.id}`,{cause:error}));
+ }}
+ // Each action owns its transaction; a failed table rolls back without blocking others.
+ if(failures.length)throw new AggregateError(failures,'Blackjack timeout processing failed for some tables');
  return processed;
 }
